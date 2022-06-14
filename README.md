@@ -1,7 +1,8 @@
 # Data Science | Final Project | Group 02
+## Identify epigenetic alterations associated with Alzheimer’s disease and classification of gene expressions between healthy and sick patients
 #### Carmen Calle Huerta, Christina Kirschbaum, Pushpa Koirala, Melika Moradi
 
-Final presentation: July 18/20
+Final presentation: July 18
 
 Notebook/code deadline: July 22
 
