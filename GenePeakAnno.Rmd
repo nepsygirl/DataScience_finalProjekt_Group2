@@ -1,0 +1,71 @@
+---
+title: "GenePeakAnno"
+output: html_document
+date: '2022-06-20'
+---
+
+```{r}
+library(BiocManager)
+install("ChIPQC")
+require(rtracklayer)
+gene <- import.bw("C:/Users/Pushpa Koirala/Documents/Chipseq-quality control/H3K27ac/H3K27ac/GSM3752845_Y-15T-H3K27ac.bw")
+gene
+
+
+```
+
+## R Markdown
+
+
+
+```{r}
+
+# load gene annotation from UCSC for human genome build hg18
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
+require(TxDb.Hsapiens.UCSC.hg18.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
+# just a shortcut
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("ChIPpeakAnno")
+
+```
+
+now we want to assign each peak to a chromosomal refion by using the feature database.We will use the ChIPpeakAnno package. 
+It has the function assignChromosomeRegion for calculating these overlaps by using a annotation database
+
+```{r pressure}
+library(ChIPpeakAnno)
+gene.features <- assignChromosomeRegion(gene, TxDb=txdb, nucleotideLevel=FALSE)
+# show the results
+show(gene.features)
+
+```
+```{r}
+length(gene)
+gene.size <- width(gene)
+summary(gene.size)
+gene <- gene[width(gene) <= 2000]
+```
+
+
+```{r}
+#Plot the distribution of sizes using the hist() function
+hist(width(gene), xlab="gene peak size", col="red")
+```
+
+
+
+```{r}
+# get the -log_10 transformed p-values from the score column
+mlPvals <- score(gene)
+
+```
+
+```{r}
+
+hist(mlPvals, xlab="-log_10(p-value)", col="red")
+```
