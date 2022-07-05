@@ -4,22 +4,18 @@ output: html_document
 date: '2022-06-20'
 ---
 
+## Gene Peak Annotation
+
 ```{r}
 library(BiocManager)
 install("ChIPQC")
 require(rtracklayer)
 gene <- import.bw("C:/Users/Pushpa Koirala/Documents/Chipseq-quality control/H3K27ac/H3K27ac/GSM3752845_Y-15T-H3K27ac.bw")
 gene
-
-
 ```
-
-## R Markdown
-
 
 
 ```{r}
-
 # load gene annotation from UCSC for human genome build hg18
 
 if (!require("BiocManager", quietly = TRUE))
@@ -34,8 +30,8 @@ BiocManager::install("ChIPpeakAnno")
 
 ```
 
-now we want to assign each peak to a chromosomal refion by using the feature database.We will use the ChIPpeakAnno package. 
-It has the function assignChromosomeRegion for calculating these overlaps by using a annotation database
+Now we want to assign each peak to a chromosomal refion by using the feature database. We will use the ChIPpeakAnno package. 
+It has the function assignChromosomeRegion for calculating these overlaps by using a annotation database.
 
 ```{r pressure}
 library(ChIPpeakAnno)
@@ -51,13 +47,10 @@ summary(gene.size)
 gene <- gene[width(gene) <= 2000]
 ```
 
-
 ```{r}
 #Plot the distribution of sizes using the hist() function
 hist(width(gene), xlab="gene peak size", col="red")
 ```
-
-
 
 ```{r}
 # get the -log_10 transformed p-values from the score column
@@ -68,4 +61,406 @@ mlPvals <- score(gene)
 ```{r}
 
 hist(mlPvals, xlab="-log_10(p-value)", col="red")
+```
+
+
+
+## Differential Gene Expression Analysis
+
+```{r}
+# for analysis
+library(tidyverse)
+library(DESeq2)
+```
+
+```{r}
+# for visualization
+library(rafalib)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(RColorBrewer)
+```
+
+### STAR
+
+```{r}
+star <- read.table(
+  'GitHub/DataScience_finalProjekt_Group2/DESeq/GSE159699_summary_count.star.txt', 
+  header = TRUE, 
+  sep = '\t',
+  row.names = 'refGene'
+  )
+head(star)
+```
+
+```{r}
+coldata_star <- read.csv(
+  'GitHub/DataScience_finalProjekt_Group2/DESeq/star_col.csv',
+  row.names = 1,
+  sep = ';'
+  )
+
+head(coldata_star)
+```
+
+```{r}
+i <- 1
+for (name in colnames(star)){
+  colnames(star)[colnames(star) == name] <- rownames(coldata_star)[i]
+  i = i + 1
+}
+
+# check form of data
+all(rownames(coldata_star) %in% colnames(star))
+all(rownames(coldata_star) == colnames(star))
+```
+
+```{r}
+coldata_star$group <- factor(coldata_star$group)
+
+dds_star <- DESeqDataSetFromMatrix(
+  countData = star,
+  colData = coldata_star,
+  design = ~ group
+)
+
+dds_star
+```
+
+```{r}
+# filter low counts
+keep <- rowSums(counts(dds_star)) >= 10
+dds_star <- dds_star[keep,]
+
+dds_star
+```
+
+#### Young vs Old
+
+```{r}
+# set reference factor to young - Young vs Old
+dds_star$group <- relevel(dds_star$group, ref = "Young")
+
+dds_star_yo <- DESeq(dds_star)
+res_star_yo <- results(dds_star_yo, alpha = 0.05)
+
+res_star_yo
+```
+
+```{r}
+summary(res_star_yo)
+```
+
+```{r}
+plotMA(res_star_yo, main="normal")
+
+resAsh <- lfcShrink(dds_star_yo, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+```{r}
+plotCount <- plotCounts(
+  dds_star_yo, 
+  gene=which.min(res_star_yo$padj), 
+  intgroup="group", 
+  returnData=TRUE
+  )
+
+
+ggplot(plotCount, aes(x=group, y=count)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) + 
+  scale_y_log10(breaks=c(25,100,400))
+```
+
+```{r}
+msd <- meanSdPlot(assay(dds_star_yo), plot = FALSE)
+msd$gg + 
+  ggtitle('Without Transformation') 
+
+# vst is a much faster transformation than rld
+vst <- vst(dds_star_yo, blind=FALSE)
+msd_vst <- meanSdPlot(assay(vst), plot = FALSE)
+msd_vst$gg + 
+  ggtitle('Variance Stabilizing Transformation')
+```
+
+```{r}
+select <- order(rowMeans(
+  counts(dds_star_yo,normalized=TRUE)),
+  decreasing=TRUE
+  )[1:30]
+
+pheatmap(
+  assay(vst)[select,],
+  cluster_rows=TRUE,
+  show_rownames=TRUE,
+  cluster_cols=FALSE
+  )
+```
+
+```{r}
+sampleDists <- dist(t(assay(vst)))
+sampleDistMatrix <- as.matrix(sampleDists)
+
+rownames(sampleDistMatrix) <- paste(vst$group, sep="-")
+colnames(sampleDistMatrix) <- NULL
+
+colors <- colorRampPalette( rev(brewer.pal(9, "Reds")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+```{r}
+plotPCA(vst, intgroup='group')
+```
+
+#### Old vs AD
+
+```{r}
+# set reference factor to old - Old vs AD
+dds_star$group <- relevel(dds_star$group, ref = "Old")
+
+dds_star_oad <- DESeq(dds_star)
+res_star_oad <- results(dds_star_oad, alpha = 0.05)
+
+res_star_oad
+```
+
+```{r}
+summary(res_star_oad)
+```
+
+```{r}
+plotMA(res_star_oad, main="normal")
+
+resAsh <- lfcShrink(dds_star_oad, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### AD vs Young
+
+```{r}
+# set reference factor to disease - AD vs Young
+dds_star$group <- relevel(dds_star$group, ref = "AD")
+
+dds_star_ady <- DESeq(dds_star)
+res_star_ady <- results(dds_star_ady, alpha = 0.05)
+
+res_star_ady
+```
+
+```{r}
+summary(res_star_ady)
+```
+
+```{r}
+plotMA(res_star_ady, main="normal")
+
+resAsh <- lfcShrink(dds_star_ady, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+### kallisto
+
+```{r}
+colname <- list(
+  '10-8A-Old','11-10T-Old','12-6A-Old','13-11T-Old','14-7A-Old','15-13T-Old',
+  '16-14T-Old','17-9A-Old','18-10A-Old','19-11A-Old','20-1T-AD','21-1A-AD',
+  '2-12A-Young','22-2T-AD','23-2A-AD','24-3T-AD','25-5T-AD','26-3A-AD',
+  '27-5A-AD','28-8T-AD','29-6T-AD','30-9T-AD','31-7T-AD','3-17T-Young',
+  '4-13A-Young','5-18T-Young','6-14A-Young','7-19T-Young','8-15A-Young','9-16A-Young'
+  )
+
+kallisto <- read.table(
+  'GitHub/DataScience_finalProjekt_Group2/DESeq/counts.kallisto.txt', 
+  header = TRUE, 
+  sep = '\t',
+  row.names = 1
+  )
+
+# drop Chr, Start, End, Strand, Length
+kallisto <- kallisto[, -(1:5)]
+
+# change column names to sample ids
+i <- 1
+for (name in colnames(kallisto)){
+  colnames(kallisto)[colnames(kallisto) == name] <- colname[i]
+  i = i + 1
+}
+
+head(kallisto)
+```
+
+```{r}
+coldata_kal <- read.csv(
+  'GitHub/DataScience_finalProjekt_Group2/DESeq/kallisto_col.csv',
+  row.names = 1,
+  sep = ';'
+  )
+
+head(coldata_kal)
+```
+
+```{r}
+# check form of data
+all(rownames(coldata_kal) %in% colnames(kallisto))
+all(rownames(coldata_kal) == colnames(kallisto))
+```
+
+```{r}
+coldata_kal$group <- factor(coldata_kal$group)
+
+dds_kallisto <- DESeqDataSetFromMatrix(
+  countData = kallisto,
+  colData = coldata_kal,
+  design = ~ group
+)
+
+dds_kallisto
+```
+
+```{r}
+# filter low counts
+keep <- rowSums(counts(dds_kallisto)) >= 10
+dds_kallisto <- dds_kallisto[keep,]
+
+dds_kallisto
+```
+
+#### Young vs Old
+
+```{r}
+# set reference factor to young - Young vs Old
+dds_kallisto$group <- relevel(dds_kallisto$group, ref = "Young")
+
+dds_kal_yo <- DESeq(dds_kallisto)
+res_kal_yo <- results(dds_kal_yo, alpha = 0.05)
+
+res_kal_yo
+```
+
+```{r}
+summary(res_kal_yo)
+```
+
+```{r}
+plotMA(res_kal_yo, main="normal")
+
+resAsh <- lfcShrink(dds_kal_yo, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+```{r}
+plotCount <- plotCounts(
+  dds_kal_yo, 
+  gene=which.min(res_kal_yo$padj), 
+  intgroup="group", 
+  returnData=TRUE
+  )
+
+
+ggplot(plotCount, aes(x=group, y=count)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) + 
+  scale_y_log10(breaks=c(25,100,400))
+```
+
+```{r}
+msd <- meanSdPlot(assay(dds_kal_yo), plot = FALSE)
+msd$gg + 
+  ggtitle('Without Transformation') 
+
+# vst is a much faster transformation than rld
+vst <- vst(dds_kal_yo, blind=FALSE)
+msd_vst <- meanSdPlot(assay(vst), plot = FALSE)
+msd_vst$gg + 
+  ggtitle('Variance Stabilizing Transformation')
+```
+
+```{r}
+select <- order(rowMeans(
+  counts(dds_kal_yo,normalized=TRUE)),
+  decreasing=TRUE
+  )[1:30]
+
+library(EnsDb.Hsapiens.v79)
+names <- ensembldb::select(
+  EnsDb.Hsapiens.v79, 
+  keys = rownames(assay(vst)[select,]), 
+  keytype = "GENEID", 
+  columns = c("SYMBOL","GENEID"))
+
+pheatmap(
+  assay(vst)[select,],
+  cluster_rows = TRUE,
+  show_rownames = TRUE,
+  labels_row = names$SYMBOL,
+  cluster_cols = FALSE
+  )
+```
+
+```{r}
+sampleDists <- dist(t(assay(vst)))
+sampleDistMatrix <- as.matrix(sampleDists)
+
+rownames(sampleDistMatrix) <- paste(vst$group, sep="-")
+colnames(sampleDistMatrix) <- NULL
+
+colors <- colorRampPalette( rev(brewer.pal(9, "Reds")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+```{r}
+plotPCA(vst, intgroup='group')
+```
+
+#### Old vs AD
+
+```{r}
+# set reference factor to old - Old vs AD
+dds_kallisto$group <- relevel(dds_kallisto$group, ref = "Old")
+
+dds_kal_oad <- DESeq(dds_kallisto)
+res_kal_oad <- results(dds_kal_oad, alpha = 0.05)
+
+res_kal_oad
+```
+
+```{r}
+summary(res_kal_oad)
+```
+
+```{r}
+plotMA(res_kal_oad, main="normal")
+
+resAsh <- lfcShrink(dds_kal_oad, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### AD vs Young
+
+```{r}
+# set reference factor to disease - AD vs Young
+dds_kallisto$group <- relevel(dds_kallisto$group, ref = "AD")
+
+dds_kal_ady <- DESeq(dds_kallisto)
+res_kal_ady <- results(dds_kal_ady, alpha = 0.05)
+
+res_kal_ady
+```
+
+```{r}
+summary(res_kal_ady)
+```
+
+```{r}
+plotMA(res_kal_ady, main="normal")
+
+resAsh <- lfcShrink(dds_kal_ady, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
 ```
