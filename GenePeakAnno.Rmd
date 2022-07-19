@@ -14,7 +14,6 @@ gene <- import.bw("C:/Users/Pushpa Koirala/Documents/Chipseq-quality control/H3K
 gene
 ```
 
-
 ```{r}
 # load gene annotation from UCSC for human genome build hg18
 
@@ -40,6 +39,7 @@ gene.features <- assignChromosomeRegion(gene, TxDb=txdb, nucleotideLevel=FALSE)
 show(gene.features)
 
 ```
+
 ```{r}
 length(gene)
 gene.size <- width(gene)
@@ -55,17 +55,29 @@ hist(width(gene), xlab="gene peak size", col="red")
 ```{r}
 # get the -log_10 transformed p-values from the score column
 mlPvals <- score(gene)
-
 ```
 
 ```{r}
-
 hist(mlPvals, xlab="-log_10(p-value)", col="red")
 ```
 
 
+### Peak Annotation and Functional Enrichment
 
-## Differential Gene Expression Analysis
+```{r}
+library(ChIPseeker)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+```
+
+```{r}
+ad <- "./peaks/*-AD_*.bed"
+for (i in length(ad)) assign(ad[i], read.csv(ad[i]))
+```
+
+
+
+## DESeq2 Analysis
 
 ```{r}
 # for analysis
@@ -391,6 +403,7 @@ names <- ensembldb::select(
   keys = rownames(assay(vst)[select,]), 
   keytype = "GENEID", 
   columns = c("SYMBOL","GENEID"))
+print(names$SYMBOL)
 
 pheatmap(
   assay(vst)[select,],
@@ -464,3 +477,724 @@ plotMA(res_kal_ady, main="normal")
 resAsh <- lfcShrink(dds_kal_ady, coef=3, type="ashr")
 plotMA(resAsh, main="ashr")
 ```
+
+
+
+## ChIPseeker Analysis 
+
+### H3K4me1
+
+```{r}
+library(ChIPseeker)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+library(rafalib)
+library(ggplot2)
+```
+
+```{r}
+path <- "Sonstiges/data/H3K4me1/"
+
+files <- list.files(path = path)
+
+adfile <- grep("AD", files, value = TRUE)
+adfile <- grep(".bed", adfile, value = TRUE)
+for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
+adfile
+
+oldfile <- grep("O", files, value = TRUE)
+oldfile <- grep(".bed", oldfile, value = TRUE)
+for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
+oldfile
+
+youngfile <- grep("Y", files, value = TRUE)
+youngfile <- grep(".bed", youngfile, value = TRUE)
+for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
+youngfile
+```
+
+```{r}
+ad <- GRangesList(`AD-1T`=`GSM3752920_AD-1T-H3K4me1.bed`,
+                  `AD-1A`=`GSM3752921_AD-1A-H3K4me1.bed`,
+                  `AD-2T`=`GSM3752922_AD-2T-H3K4me1.bed`,
+                  `AD-2A`=`GSM3752923_AD-2A-H3K4me1.bed`,
+                  `AD-3T`=`GSM3752924_AD-3T-H3K4me1.bed`,
+                  `AD-5T`=`GSM3752925_AD-5T-H3K4me1.bed`,
+                  `AD-3A`=`GSM3752926_AD-3A-H3K4me1.bed`,
+                  `AD-5A`=`GSM3752927_AD-5A-H3K4me1.bed`,
+                  `AD-8T`=`GSM3752928_AD-8T-H3K4me1.bed`,
+                  `AD-6T`=`GSM3752929_AD-6T-H3K4me1.bed`,
+                  `AD-7T`=`GSM3752930_AD-7T-H3K4me1.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+old <- GRangesList(`O-8A`=`GSM3752910_O-8A-H3K4me1.bed`,
+                   `O-10T`=`GSM3752911_O-10T-H3K4me1.bed`,
+                   `O-6A`=`GSM3752912_O-6A-H3K4me1.bed`,
+                   `O-11T`=`GSM3752913_O-11T-H3K4me1.bed`,
+                   `O-7A`=`GSM3752914_O-7A-H3K4me1.bed`,
+                   `O-13T`=`GSM3752915_O-13T-H3K4me1.bed`,
+                   `O-14T`=`GSM3752916_O-14T-H3K4me1.bed`,
+                   `O-9A`=`GSM3752917_O-9A-H3K4me1.bed`,
+                   `O-10A`=`GSM3752918_O-10A-H3K4me1.bed`,
+                   `O-11A`=`GSM3752919_O-11A-H3K4me1.bed`)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+young <- GRangesList(`Y-15T`=`GSM3752902_Y-15T-H3K4me1.bed`,
+                     `Y-17T`=`GSM3752903_Y-17T-H3K4me1.bed`,
+                     `Y-13A`=`GSM3752904_Y-13A-H3K4me1.bed`,
+                     `Y-18T`=`GSM3752905_Y-18T-H3K4me1.bed`,
+                     `Y-14A`=`GSM3752906_Y-14A-H3K4me1.bed`,
+                     `Y-19T`=`GSM3752907_Y-19T-H3K4me1.bed`,
+                     `Y-15A`=`GSM3752908_Y-15A-H3K4me1.bed`,
+                     `Y-16A`=`GSM3752909_Y-16A-H3K4me1.bed`)
+```
+
+```{r}
+p <- covplot(young, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(c(ad, old, young), weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adList <- lapply(ad, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+oldList <- lapply(old, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+youngList <- lapply(young, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+```
+
+```{r}
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(adList)
+```
+
+```{r}
+plotDistToTSS(adList)
+```
+
+```{r}
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(oldList)
+```
+
+```{r}
+plotDistToTSS(oldList)
+```
+
+```{r}
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(youngList)
+```
+
+```{r}
+plotDistToTSS(youngList)
+```
+
+#### Functional Enrichment
+
+```{r}
+library(clusterProfiler)
+
+genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+names(genes) = sub("_", "\n", names(genes))
+
+compKEGG <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichKEGG",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH")
+
+dotplot(compKEGG, 
+        showCategory = 10, 
+        title = "KEGG Pathway Enrichment Analysis")
+```
+
+```{r}
+library(org.Hs.eg.db)
+compGO <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichGO",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH",
+                         OrgDb = "org.Hs.eg.db")
+
+dotplot(compGO, 
+        showCategory = 10, 
+        title = "GO Enrichment Analysis")
+```
+
+
+
+### H3K9ac
+
+```{r}
+path <- "Sonstiges/data/H3K9ac/"
+
+files <- list.files(path = path)
+
+adfile <- grep("AD", files, value = TRUE)
+adfile <- grep(".bed", adfile, value = TRUE)
+for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
+adfile
+
+oldfile <- grep("O", files, value = TRUE)
+oldfile <- grep(".bed", oldfile, value = TRUE)
+for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
+oldfile
+
+youngfile <- grep("Y", files, value = TRUE)
+youngfile <- grep(".bed", youngfile, value = TRUE)
+for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
+youngfile
+```
+
+```{r}
+ad <- GRangesList(`AD-1T`=`GSM3752834_AD-1T-H3K9ac.bed`,
+                  `AD-1A`=`GSM3752835_AD-1A-H3K9ac.bed`,
+                  `AD-2T`=`GSM3752836_AD-2T-H3K9ac.bed`,
+                  `AD-2A`=`GSM3752837_AD-2A-H3K9ac.bed`,
+                  `AD-3T`=`GSM3752838_AD-3T-H3K9ac.bed`,
+                  `AD-5T`=`GSM3752839_AD-5T-H3K9ac.bed`,
+                  `AD-3A`=`GSM3752840_AD-3A-H3K9ac.bed`,
+                  `AD-5A`=`GSM3752841_AD-5A-H3K9ac.bed`,
+                  `AD-8T`=`GSM3752842_AD-8T-H3K9ac.bed`,
+                  `AD-6T`=`GSM3752843_AD-6T-H3K9ac.bed`,
+                  `AD-7T`=`GSM3752844_AD-7T-H3K9ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+old <- GRangesList(`O-8A`=`GSM3752824_O-8A-H3K9ac.bed`,
+                   `O-10T`=`GSM3752825_O-10T-H3K9ac.bed`,
+                   `O-6A`=`GSM3752826_O-6A-H3K9ac.bed`,
+                   `O-11T`=`GSM3752827_O-11T-H3K9ac.bed`,
+                   `O-7A`=`GSM3752828_O-7A-H3K9ac.bed`,
+                   `O-13T`=`GSM3752829_O-13T-H3K9ac.bed`,
+                   `O-14T`=`GSM3752830_O-14T-H3K9ac.bed`,
+                   `O-9A`=`GSM3752831_O-9A-H3K9ac.bed`,
+                   `O-10A`=`GSM3752832_O-10A-H3K9ac.bed`,
+                   `O-11A`=`GSM3752833_O-11A-H3K9ac.bed`)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+young <- GRangesList(`Y-15T`=`GSM3752815_Y-15T-H3K9ac.bed`,
+                     `Y-12A`=`GSM3752816_Y-12A-H3K9ac.bed`,
+                     `Y-17T`=`GSM3752817_Y-17T-H3K9ac.bed`,
+                     `Y-13A`=`GSM3752818_Y-13A-H3K9ac.bed`,
+                     `Y-18T`=`GSM3752819_Y-18T-H3K9ac.bed`,
+                     `Y-14A`=`GSM3752820_Y-14A-H3K9ac.bed`,
+                     `Y-19T`=`GSM3752821_Y-19T-H3K9ac.bed`,
+                     `Y-15A`=`GSM3752822_Y-15A-H3K9ac.bed`,
+                     `Y-16A`=`GSM3752823_Y-16A-H3K9ac.bed`)
+```
+
+```{r}
+p <- covplot(young, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(c(ad, old, young), weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adList <- lapply(ad, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+oldList <- lapply(old, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+youngList <- lapply(young, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+```
+
+```{r}
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(adList)
+```
+
+```{r}
+plotDistToTSS(adList)
+```
+
+```{r}
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(oldList)
+```
+
+```{r}
+plotDistToTSS(oldList)
+```
+
+```{r}
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(youngList)
+```
+
+```{r}
+plotDistToTSS(youngList)
+```
+
+#### Functional Enrichment
+
+```{r}
+genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+names(genes) = sub("_", "\n", names(genes))
+
+compKEGG <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichKEGG",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH")
+
+dotplot(compKEGG, 
+        showCategory = 10, 
+        title = "KEGG Pathway Enrichment Analysis")
+```
+
+```{r}
+compGO <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichGO",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH",
+                         OrgDb = "org.Hs.eg.db")
+
+dotplot(compGO, 
+        showCategory = 10, 
+        title = "GO Enrichment Analysis")
+```
+
+
+
+### H3K27ac
+
+```{r}
+path <- "Sonstiges/data/H3K27ac/"
+
+files <- list.files(path = path)
+
+adfile <- grep("AD", files, value = TRUE)
+adfile <- grep(".bed", adfile, value = TRUE)
+for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
+adfile
+
+oldfile <- grep("O", files, value = TRUE)
+oldfile <- grep(".bed", oldfile, value = TRUE)
+for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
+oldfile
+
+youngfile <- grep("Y", files, value = TRUE)
+youngfile <- grep(".bed", youngfile, value = TRUE)
+for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
+youngfile
+```
+
+```{r}
+ad <- GRangesList(`AD-1T`=`GSM3752864_AD-1T-H3K27ac.bed`,
+                  `AD-1A`=`GSM3752865_AD-1A-H3K27ac.bed`,
+                  `AD-2T`=`GSM3752866_AD-2T-H3K27ac.bed`,
+                  `AD-2A`=`GSM3752867_AD-2A-H3K27ac.bed`,
+                  `AD-3T`=`GSM3752868_AD-3T-H3K27ac.bed`,
+                  `AD-5T`=`GSM3752869_AD-5T-H3K27ac.bed`,
+                  `AD-3A`=`GSM3752870_AD-3A-H3K27ac.bed`,
+                  `AD-5A`=`GSM3752871_AD-5A-H3K27ac.bed`,
+                  `AD-8T`=`GSM3752872_AD-8T-H3K27ac.bed`,
+                  `AD-6T`=`GSM3752873_AD-6T-H3K27ac.bed`,
+                  `AD-7T`=`GSM3752874_AD-7T-H3K27ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+old <- GRangesList(`O-8A`=`GSM3752854_O-8A-H3K27ac.bed`,
+                   `O-10T`=`GSM3752855_O-10T-H3K27ac.bed`,
+                   `O-6A`=`GSM3752856_O-6A-H3K27ac.bed`,
+                   `O-11T`=`GSM3752857_O-11T-H3K27ac.bed`,
+                   `O-7A`=`GSM3752858_O-7A-H3K27ac.bed`,
+                   `O-13T`=`GSM3752859_O-13T-H3K27ac.bed`,
+                   `O-14T`=`GSM3752860_O-14T-H3K27ac.bed`,
+                   `O-9A`=`GSM3752861_O-9A-H3K27ac.bed`,
+                   `O-10A`=`GSM3752862_O-10A-H3K27ac.bed`,
+                   `O-11A`=`GSM3752863_O-11A-H3K27ac.bed`)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+young <- GRangesList(`Y-15T`=`GSM3752845_Y-15T-H3K27ac.bed`,
+                     `Y-12A`=`GSM3752846_Y-12A-H3K27ac.bed`,
+                     `Y-17T`=`GSM3752847_Y-17T-H3K27ac.bed`,
+                     `Y-13A`=`GSM3752848_Y-13A-H3K27ac.bed`,
+                     `Y-18T`=`GSM3752849_Y-18T-H3K27ac.bed`,
+                     `Y-14A`=`GSM3752850_Y-14A-H3K27ac.bed`,
+                     `Y-19T`=`GSM3752851_Y-19T-H3K27ac.bed`,
+                     `Y-15A`=`GSM3752852_Y-15A-H3K27ac.bed`,
+                     `Y-16A`=`GSM3752853_Y-16A-H3K27ac.bed`)
+```
+
+```{r}
+p <- covplot(young, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(c(ad, old, young), weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adList <- lapply(ad, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+oldList <- lapply(old, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+youngList <- lapply(young, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+```
+
+```{r}
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(adList)
+```
+
+```{r}
+plotDistToTSS(adList)
+```
+
+```{r}
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(oldList)
+```
+
+```{r}
+plotDistToTSS(oldList)
+```
+
+```{r}
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(youngList)
+```
+
+```{r}
+plotDistToTSS(youngList)
+```
+
+#### Functional Enrichment
+
+```{r}
+genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+names(genes) = sub("_", "\n", names(genes))
+
+compKEGG <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichKEGG",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH")
+
+dotplot(compKEGG, 
+        showCategory = 10, 
+        title = "KEGG Pathway Enrichment Analysis")
+```
+
+```{r}
+compGO <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichGO",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH",
+                         OrgDb = "org.Hs.eg.db")
+
+dotplot(compGO, 
+        showCategory = 10, 
+        title = "GO Enrichment Analysis")
+```
+
+
+
+### H3K122ac
+
+```{r}
+path <- "Sonstiges/data/H3K122ac/"
+
+files <- list.files(path = path)
+
+adfile <- grep("AD", files, value = TRUE)
+adfile <- grep(".bed", adfile, value = TRUE)
+for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
+adfile
+
+oldfile <- grep("O", files, value = TRUE)
+oldfile <- grep(".bed", oldfile, value = TRUE)
+for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
+oldfile
+
+youngfile <- grep("Y", files, value = TRUE)
+youngfile <- grep(".bed", youngfile, value = TRUE)
+for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
+youngfile
+```
+
+```{r}
+ad <- GRangesList(`AD-1T`=`GSM3752893_AD-1T-H3K122ac.bed`,
+                  `AD-1A`=`GSM3752894_AD-1A-H3K122ac.bed`,
+                  `AD-2T`=`GSM3752895_AD-2T-H3K122ac.bed`,
+                  `AD-2A`=`GSM3752896_AD-2A-H3K122ac.bed`,
+                  `AD-5T`=`GSM3752897_AD-5T-H3K122ac.bed`,
+                  `AD-3A`=`GSM3752898_AD-3A-H3K122ac.bed`,
+                  `AD-5A`=`GSM3752898_AD-3A-H3K122ac.bed`,
+                  `AD-8T`=`GSM3752900_AD-8T-H3K122ac.bed`,
+                  `AD-7T`=`GSM3752901_AD-7T-H3K122ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+old <- GRangesList(`O-8A`=`GSM3752883_O-8A-H3K122ac.bed`,
+                   `O-10T`=`GSM3752884_O-10T-H3K122ac.bed`,
+                   `O-6A`=`GSM3752885_O-6A-H3K122ac.bed`,
+                   `O-11T`=`GSM3752886_O-11T-H3K122ac.bed`,
+                   `O-7A`=`GSM3752887_O-7A-H3K122ac.bed`,
+                   `O-13T`=`GSM3752888_O-13T-H3K122ac.bed`,
+                   `O-14T`=`GSM3752889_O-14T-H3K122ac.bed`,
+                   `O-9A`=`GSM3752890_O-9A-H3K122ac.bed`,
+                   `O-10A`=`GSM3752891_O-10A-H3K122ac.bed`,
+                   `O-11A`=`GSM3752892_O-11A-H3K122ac.bed`)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+young <- GRangesList(`Y-15T`=`GSM3752875_Y-15T-H3K122ac.bed`,
+                     `Y-17T`=`GSM3752876_Y-17T-H3K122ac.bed`,
+                     `Y-13A`=`GSM3752877_Y-13A-H3K122ac.bed`,
+                     `Y-18T`=`GSM3752878_Y-18T-H3K122ac.bed`,
+                     `Y-14A`=`GSM3752879_Y-14A-H3K122ac.bed`,
+                     `Y-19T`=`GSM3752880_Y-19T-H3K122ac.bed`,
+                     `Y-15A`=`GSM3752881_Y-15A-H3K122ac.bed`,
+                     `Y-16A`=`GSM3752882_Y-16A-H3K122ac.bed`)
+```
+
+```{r}
+p <- covplot(young, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(c(ad, old, young), weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adList <- lapply(ad, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+oldList <- lapply(old, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+youngList <- lapply(young, annotatePeak, TxDb = txdb,
+                 tssRegion = c(-3000,3000), verbose=FALSE)
+```
+
+```{r}
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(adList)
+```
+
+```{r}
+plotDistToTSS(adList)
+```
+
+```{r}
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(oldList)
+```
+
+```{r}
+plotDistToTSS(oldList)
+```
+
+```{r}
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+```{r}
+plotAnnoBar(youngList)
+```
+
+```{r}
+plotDistToTSS(youngList)
+```
+
+#### Functional Enrichment
+
+```{r}
+genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+names(genes) = sub("_", "\n", names(genes))
+
+compKEGG <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichKEGG",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH")
+
+dotplot(compKEGG, 
+        showCategory = 10, 
+        title = "KEGG Pathway Enrichment Analysis")
+```
+
+```{r}
+compGO <- compareCluster(geneCluster   = genes,
+                           fun           = "enrichGO",
+                           pvalueCutoff  = 0.05,
+                           pAdjustMethod = "BH",
+                         OrgDb = "org.Hs.eg.db")
+
+dotplot(compGO, 
+        showCategory = 10, 
+        title = "GO Enrichment Analysis")
+```
+
