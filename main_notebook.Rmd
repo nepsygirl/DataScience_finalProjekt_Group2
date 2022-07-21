@@ -4,56 +4,47 @@ output: html_document
 date: '2022-06-20'
 ---
 
-# Data Science | Final Project | Group 02
+# Data Science \| Final Project \| Group 02
 
-## Identify epigenetic alterations associated with Alzheimer’s disease and classification of gene expressions between healthy and sick patients
+# Identify epigenetic alterations associated with Alzheimer's disease and classification of gene expressions between healthy and sick patients
 
-#### Christina Kirschbaum, Pushpa Koirala, Melika Moradi
+**Christina Kirschbaum, Pushpa Koirala, Melika Moradi**
 
 ## Our Project
 
-Alzheimer’s disease is the most prevalent kind of dementia and a fatal brain ailment. More study into this illness might lead to a better understanding of the condition and more effective treatment options. 
+Alzheimer's disease is the most prevalent kind of dementia and a fatal brain ailment. More study into this illness might lead to a better understanding of the condition and more effective treatment options.
 
 In this project, ChIP-seq data for H3K27ac, H3K9ac, H3K122ac and H3K4me1 as well as RNA-seq data from the from the lateral temporal lobe of the human brain for young healthy patients, old heathy patients and patients with Alzheimers disease will be analyzed and the differences between normal aging and cognitive impairment will be explored. The epigenomic or transcriptomic profiles will be analyzed to find relevant epigenetic alterations associated with the disease and help to better understand the molecular pathophysiology underlying.
 
-Afterwards, with Machine Learning models the presence and absence of Alzheimer’s disease based on the data. The models will be built with Support Vector Machines and Random Forest.
+Afterwards, with Machine Learning models the presence and absence of Alzheimer's disease based on the data. The models will be built with Support Vector Machines and Random Forest.
 
 Finally, the findings will be compared to them in related papers, we will look into relevant *in vivo* experiments with model organisms and use the Genome Browser to generate ChIP-seq tracks.
 
-For our project we were inspirated by the paper:
-Nativio R, Lan Y, Donahue G et al. ["An integrated multi-omics approach identifies epigenetic alterations associated with Alzheimer’s disease."](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8098004/)
+For our project we were inspirated by the paper: Nativio R, Lan Y, Donahue G et al. ["An integrated multi-omics approach identifies epigenetic alterations associated with Alzheimer's disease."](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8098004/)
 
-The data is derived from GEO, [Series GSE153875](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE153875), for the CHiP-seq data and the raw RNA-seq data [Series GSE159699](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA670209&o=acc_s%3Aa). 
-
-
+The data is derived from GEO, [Series GSE153875](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE153875), for the CHiP-seq data and the raw RNA-seq data [Series GSE159699](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA670209&o=acc_s%3Aa).
 
 ## Data Integration RNA-seq
 
 This part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Data Integration RNA-seq***.
 
-
-
 ## Data Integration ChIP-seq
 
 This part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Data Integration ChIP-seq***.
-
-
 
 ## Preprocessing RNA-seq
 
 This part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Preprocessing RNA-seq***.
 
-
-
 ## Quality Control ChIP-seq
 
 This part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Quality Control ChIP-seq***.
 
-
-
-## Data Analysis ChIP-seq 
+## Data Analysis ChIP-seq
 
 The main part of the ChIP-seq analysis can be found in the following section. For the deeptools part, refer the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Data Analysis ChIP-seq***.
+
+### H3K27ac ChIPpeakAnno
 
 ```{r}
 library(BiocManager)
@@ -67,7 +58,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("ChIPpeakAnno")
 ```
 
-The function read.table reads an input file and transformed it into a data.frame, the basic data structure in R. Lines starting with # are ignored by default and the option header=TRUE indicates that the first line contains the column names.
+The function read.table reads an input file and transformed it into a data.frame, the basic data structure in R. Lines starting with \# are ignored by default and the option header=TRUE indicates that the first line contains the column names.
 
 ```{r}
 #The function read.table reads an input file and transformed it into a data.frame, the basic data structure in R. 
@@ -181,7 +172,7 @@ venn <- Venn(SetNames=c("H3K27ac_AD", "H3K27ac_Old"),
 plot(venn)
 ```
 
-#### Functional Enrichment
+#### H3K27ac Functional Enrichment
 
 ```{r}
 # load gene annotation from UCSC for human genome build hg18
@@ -190,7 +181,7 @@ txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene
 ```
 
 ```{r}
-require(ChIPpeakAnno)   # laod package to annotate peaks with genes.We will use the ChIPpeakAnno package. It has the function assignChromosomeRegion for calculating these overlaps by using a annotation database.
+require(ChIPpeakAnno)   # load package to annotate peaks with genes.We will use the ChIPpeakAnno package. It has the function assignChromosomeRegion for calculating these overlaps by using a annotation database.
 # calucluate the overlap with features
 H3K27ac_AD.features <- assignChromosomeRegion(H3K27ac_AD, TxDb=txdb, nucleotideLevel=FALSE)
 # show the results
@@ -231,16 +222,19 @@ gene1.ids <- unique(names(H3K27ac_ADprom))
 write.table(gene1.ids, file="H3K27ac_AD_regulated_genes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
 ```
 
-
 ### H3K4me1 with ChIPseeker
 
-```{r}
+First, we import all the librarys that are needed to do the analysis with the Biocondutor package [ChIPseeker](https://bioconductor.org/packages/release/bioc/html/ChIPseeker.html). We abbreviate `TxDb.Hsapiens.UCSC.hg19.knownGene` to `txdb` to access it easier.
+
+```{r echo = T, results = 'hide'}
 library(ChIPseeker)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 library(rafalib)
 library(ggplot2)
 ```
+
+In the next step, we read the BED files for H3K4me1 and split them into AD, old and young.
 
 ```{r}
 path <- "Sonstiges/data/H3K4me1/"
@@ -263,6 +257,8 @@ for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youn
 youngfile
 ```
 
+In the following three chunks, we build GRangesLists for every group.
+
 ```{r}
 ad <- GRangesList(`AD-1T`=`GSM3752920_AD-1T-H3K4me1.bed`,
                   `AD-1A`=`GSM3752921_AD-1A-H3K4me1.bed`,
@@ -275,14 +271,6 @@ ad <- GRangesList(`AD-1T`=`GSM3752920_AD-1T-H3K4me1.bed`,
                   `AD-8T`=`GSM3752928_AD-8T-H3K4me1.bed`,
                   `AD-6T`=`GSM3752929_AD-6T-H3K4me1.bed`,
                   `AD-7T`=`GSM3752930_AD-7T-H3K4me1.bed`)
-```
-
-```{r}
-p <- covplot(ad, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
 ```
 
 ```{r}
@@ -299,14 +287,6 @@ old <- GRangesList(`O-8A`=`GSM3752910_O-8A-H3K4me1.bed`,
 ```
 
 ```{r}
-p <- covplot(old, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 young <- GRangesList(`Y-15T`=`GSM3752902_Y-15T-H3K4me1.bed`,
                      `Y-17T`=`GSM3752903_Y-17T-H3K4me1.bed`,
                      `Y-13A`=`GSM3752904_Y-13A-H3K4me1.bed`,
@@ -315,6 +295,28 @@ young <- GRangesList(`Y-15T`=`GSM3752902_Y-15T-H3K4me1.bed`,
                      `Y-19T`=`GSM3752907_Y-19T-H3K4me1.bed`,
                      `Y-15A`=`GSM3752908_Y-15A-H3K4me1.bed`,
                      `Y-16A`=`GSM3752909_Y-16A-H3K4me1.bed`)
+```
+
+The next four chunks will generate coverage plots for the peak over the chromosomes. The first 3 chunks will compare within the groups, while the fourth chunk will compare over all groups.
+
+`p` will show an overlapping plot for all samples, while adding `facet_grid()` will generate a seperate plot for every sample.
+
+Note that the `weightCol` parameter is necessary to distinguish the coverage easier.
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
 ```
 
 ```{r}
@@ -333,10 +335,7 @@ p +
   facet_grid(chr ~ .id)
 ```
 
-
 ```{r}
-promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
-
 adList <- lapply(ad, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
 oldList <- lapply(old, annotatePeak, TxDb = txdb,
@@ -346,48 +345,35 @@ youngList <- lapply(young, annotatePeak, TxDb = txdb,
 ```
 
 ```{r}
-adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(adList)
-```
-
-```{r}
-plotDistToTSS(adList)
-```
-
-```{r}
-oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(oldList)
-```
-
-```{r}
-plotDistToTSS(oldList)
-```
-
-```{r}
-youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(youngList)
 ```
 
 ```{r}
+plotDistToTSS(adList)
+plotDistToTSS(oldList)
 plotDistToTSS(youngList)
 ```
 
-#### Functional Enrichment
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+```
+
+```{r}
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+#### H3K4me1 Functional Enrichment
 
 ```{r}
 library(clusterProfiler)
@@ -418,8 +404,9 @@ dotplot(compGO,
         title = "GO Enrichment Analysis")
 ```
 
-
 ### H3K9ac with ChIPseeker
+
+In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K9ac.
 
 ```{r}
 path <- "Sonstiges/data/H3K9ac/"
@@ -457,14 +444,6 @@ ad <- GRangesList(`AD-1T`=`GSM3752834_AD-1T-H3K9ac.bed`,
 ```
 
 ```{r}
-p <- covplot(ad, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 old <- GRangesList(`O-8A`=`GSM3752824_O-8A-H3K9ac.bed`,
                    `O-10T`=`GSM3752825_O-10T-H3K9ac.bed`,
                    `O-6A`=`GSM3752826_O-6A-H3K9ac.bed`,
@@ -478,14 +457,6 @@ old <- GRangesList(`O-8A`=`GSM3752824_O-8A-H3K9ac.bed`,
 ```
 
 ```{r}
-p <- covplot(old, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 young <- GRangesList(`Y-15T`=`GSM3752815_Y-15T-H3K9ac.bed`,
                      `Y-12A`=`GSM3752816_Y-12A-H3K9ac.bed`,
                      `Y-17T`=`GSM3752817_Y-17T-H3K9ac.bed`,
@@ -495,6 +466,22 @@ young <- GRangesList(`Y-15T`=`GSM3752815_Y-15T-H3K9ac.bed`,
                      `Y-19T`=`GSM3752821_Y-19T-H3K9ac.bed`,
                      `Y-15A`=`GSM3752822_Y-15A-H3K9ac.bed`,
                      `Y-16A`=`GSM3752823_Y-16A-H3K9ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
 ```
 
 ```{r}
@@ -513,10 +500,7 @@ p +
   facet_grid(chr ~ .id)
 ```
 
-
 ```{r}
-promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
-
 adList <- lapply(ad, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
 oldList <- lapply(old, annotatePeak, TxDb = txdb,
@@ -526,48 +510,35 @@ youngList <- lapply(young, annotatePeak, TxDb = txdb,
 ```
 
 ```{r}
-adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(adList)
-```
-
-```{r}
-plotDistToTSS(adList)
-```
-
-```{r}
-oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(oldList)
-```
-
-```{r}
-plotDistToTSS(oldList)
-```
-
-```{r}
-youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(youngList)
 ```
 
 ```{r}
+plotDistToTSS(adList)
+plotDistToTSS(oldList)
 plotDistToTSS(youngList)
 ```
 
-#### Functional Enrichment
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+```
+
+```{r}
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+#### H3K9ac Functional Enrichment
 
 ```{r}
 genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
@@ -595,9 +566,9 @@ dotplot(compGO,
         title = "GO Enrichment Analysis")
 ```
 
-
-
 ### H3K27ac with ChIPseeker
+
+In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K27ac.
 
 ```{r}
 path <- "Sonstiges/data/H3K27ac/"
@@ -635,14 +606,6 @@ ad <- GRangesList(`AD-1T`=`GSM3752864_AD-1T-H3K27ac.bed`,
 ```
 
 ```{r}
-p <- covplot(ad, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 old <- GRangesList(`O-8A`=`GSM3752854_O-8A-H3K27ac.bed`,
                    `O-10T`=`GSM3752855_O-10T-H3K27ac.bed`,
                    `O-6A`=`GSM3752856_O-6A-H3K27ac.bed`,
@@ -656,14 +619,6 @@ old <- GRangesList(`O-8A`=`GSM3752854_O-8A-H3K27ac.bed`,
 ```
 
 ```{r}
-p <- covplot(old, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 young <- GRangesList(`Y-15T`=`GSM3752845_Y-15T-H3K27ac.bed`,
                      `Y-12A`=`GSM3752846_Y-12A-H3K27ac.bed`,
                      `Y-17T`=`GSM3752847_Y-17T-H3K27ac.bed`,
@@ -673,6 +628,22 @@ young <- GRangesList(`Y-15T`=`GSM3752845_Y-15T-H3K27ac.bed`,
                      `Y-19T`=`GSM3752851_Y-19T-H3K27ac.bed`,
                      `Y-15A`=`GSM3752852_Y-15A-H3K27ac.bed`,
                      `Y-16A`=`GSM3752853_Y-16A-H3K27ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
 ```
 
 ```{r}
@@ -691,10 +662,7 @@ p +
   facet_grid(chr ~ .id)
 ```
 
-
 ```{r}
-promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
-
 adList <- lapply(ad, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
 oldList <- lapply(old, annotatePeak, TxDb = txdb,
@@ -704,48 +672,35 @@ youngList <- lapply(young, annotatePeak, TxDb = txdb,
 ```
 
 ```{r}
-adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(adList)
-```
-
-```{r}
-plotDistToTSS(adList)
-```
-
-```{r}
-oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(oldList)
-```
-
-```{r}
-plotDistToTSS(oldList)
-```
-
-```{r}
-youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(youngList)
 ```
 
 ```{r}
+plotDistToTSS(adList)
+plotDistToTSS(oldList)
 plotDistToTSS(youngList)
 ```
 
-#### Functional Enrichment
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+```
+
+```{r}
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+#### H3K27ac Functional Enrichment
 
 ```{r}
 genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
@@ -763,9 +718,9 @@ dotplot(compKEGG,
 
 ```{r}
 compGO <- compareCluster(geneCluster   = genes,
-                           fun           = "enrichGO",
-                           pvalueCutoff  = 0.05,
-                           pAdjustMethod = "BH",
+                         fun           = "enrichGO",
+                         pvalueCutoff  = 0.05,
+                         pAdjustMethod = "BH",
                          OrgDb = "org.Hs.eg.db")
 
 dotplot(compGO, 
@@ -773,8 +728,9 @@ dotplot(compGO,
         title = "GO Enrichment Analysis")
 ```
 
+### H3K122ac with ChIPseeker
 
-### H3K122ac  with ChIPseeker
+In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K122ac.
 
 ```{r}
 path <- "Sonstiges/data/H3K122ac/"
@@ -810,14 +766,6 @@ ad <- GRangesList(`AD-1T`=`GSM3752893_AD-1T-H3K122ac.bed`,
 ```
 
 ```{r}
-p <- covplot(ad, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 old <- GRangesList(`O-8A`=`GSM3752883_O-8A-H3K122ac.bed`,
                    `O-10T`=`GSM3752884_O-10T-H3K122ac.bed`,
                    `O-6A`=`GSM3752885_O-6A-H3K122ac.bed`,
@@ -831,14 +779,6 @@ old <- GRangesList(`O-8A`=`GSM3752883_O-8A-H3K122ac.bed`,
 ```
 
 ```{r}
-p <- covplot(old, weightCol = 'V5')
-print(p)
-
-p +
-  facet_grid(chr ~ .id)
-```
-
-```{r}
 young <- GRangesList(`Y-15T`=`GSM3752875_Y-15T-H3K122ac.bed`,
                      `Y-17T`=`GSM3752876_Y-17T-H3K122ac.bed`,
                      `Y-13A`=`GSM3752877_Y-13A-H3K122ac.bed`,
@@ -847,6 +787,22 @@ young <- GRangesList(`Y-15T`=`GSM3752875_Y-15T-H3K122ac.bed`,
                      `Y-19T`=`GSM3752880_Y-19T-H3K122ac.bed`,
                      `Y-15A`=`GSM3752881_Y-15A-H3K122ac.bed`,
                      `Y-16A`=`GSM3752882_Y-16A-H3K122ac.bed`)
+```
+
+```{r}
+p <- covplot(ad, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
+```
+
+```{r}
+p <- covplot(old, weightCol = 'V5')
+print(p)
+
+p +
+  facet_grid(chr ~ .id)
 ```
 
 ```{r}
@@ -866,8 +822,6 @@ p +
 ```
 
 ```{r}
-promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
-
 adList <- lapply(ad, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
 oldList <- lapply(old, annotatePeak, TxDb = txdb,
@@ -877,48 +831,35 @@ youngList <- lapply(young, annotatePeak, TxDb = txdb,
 ```
 
 ```{r}
-adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(adList)
-```
-
-```{r}
-plotDistToTSS(adList)
-```
-
-```{r}
-oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(oldList)
-```
-
-```{r}
-plotDistToTSS(oldList)
-```
-
-```{r}
-youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-```
-
-```{r}
 plotAnnoBar(youngList)
 ```
 
 ```{r}
+plotDistToTSS(adList)
+plotDistToTSS(oldList)
 plotDistToTSS(youngList)
 ```
 
-#### Functional Enrichment
+```{r}
+promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
+
+adMatrix <- lapply(ad, getTagMatrix, windows=promoter)
+oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
+youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
+```
+
+```{r}
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
+            resample = 500, facet = 'row')
+```
+
+#### H3K122ac Functional Enrichment
 
 ```{r}
 genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
@@ -946,18 +887,18 @@ dotplot(compGO,
         title = "GO Enrichment Analysis")
 ```
 
-
-
 ## Data Analysis RNA-seq
 
-```{r}
-# for analysis
+For the RNA-seq Data Analysis, a Differential Gene Expression analysis is done with the Biocondutor package [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html).
+
+In the following chunks, we import the needed librarys for the Differential Gene Expression analysis. The first chunk imports the librarys for the analysis, the second chunk imports the librarys for visualization.
+
+```{r echo = T, results = 'hide'}
 library(tidyverse)
 library(DESeq2)
 ```
 
-```{r}
-# for visualization
+```{r echo = T, results = 'hide'}
 library(rafalib)
 library(ggplot2)
 library(vsn)
@@ -966,6 +907,8 @@ library(RColorBrewer)
 ```
 
 ### STAR
+
+First of all, we import the RNA-seq count matrix. Here, the original count matrix from the Nativio et al. paper where the data was aligned with STAR is loaded.
 
 ```{r}
 star <- read.table(
@@ -977,6 +920,8 @@ star <- read.table(
 head(star)
 ```
 
+In the next step, we load the corresponding metafile. The metafile was written by us.
+
 ```{r}
 coldata_star <- read.csv(
   'data/star_col.csv',
@@ -987,17 +932,24 @@ coldata_star <- read.csv(
 head(coldata_star)
 ```
 
+Here, we change the columnnames of of the count matrix to equal the rownames of the metafile, because the metafile only includes the sample identifier as name.
+
 ```{r}
 i <- 1
 for (name in colnames(star)){
   colnames(star)[colnames(star) == name] <- rownames(coldata_star)[i]
   i = i + 1
 }
+```
 
-# check form of data
+Now, we check the form of our data. In detail, we check if all rows from the metafile are also available as columns of the count matrix and if the rownames of the metafile are the same as the columnnames of the count matrix. If not both of the following commands return TRUE, DESeq is not able to work with the files.
+
+```{r}
 all(rownames(coldata_star) %in% colnames(star))
 all(rownames(coldata_star) == colnames(star))
 ```
+
+In the following, we first factor the groups of the metafile because otherwise there will be a warning and build a DESeqDataSet afterwards.
 
 ```{r}
 coldata_star$group <- factor(coldata_star$group)
@@ -1011,8 +963,9 @@ dds_star <- DESeqDataSetFromMatrix(
 dds_star
 ```
 
+We perform a pre-filtering which removes rows with less than 10 counts from the DESeqDataSet. Here, about 4000 rows are removed. Note that a more strict filtering will be applied when we use `results()` later on.
+
 ```{r}
-# filter low counts
 keep <- rowSums(counts(dds_star)) >= 10
 dds_star <- dds_star[keep,]
 
@@ -1021,8 +974,9 @@ dds_star
 
 #### Young vs Old
 
+Now, we set the reference factor to young to get the differentially expressed genes between the young and the old group. As alpha we choose 0.05, like they did in the paper of Nativio et al.
+
 ```{r}
-# set reference factor to young - Young vs Old
 dds_star$group <- relevel(dds_star$group, ref = "Young")
 
 dds_star_yo <- DESeq(dds_star)
@@ -1031,9 +985,13 @@ res_star_yo <- results(dds_star_yo, alpha = 0.05)
 res_star_yo
 ```
 
+We take a look at the summary.
+
 ```{r}
 summary(res_star_yo)
 ```
+
+Finally, we generate a MA-plot to visualize the differentially expressed genes. With `lfcShrink` we use `type=ashr`, to separate the differentially and not differentially expressed genes more clearly.
 
 ```{r}
 plotMA(res_star_yo, main="normal")
@@ -1041,6 +999,56 @@ plotMA(res_star_yo, main="normal")
 resAsh <- lfcShrink(dds_star_yo, coef=3, type="ashr")
 plotMA(resAsh, main="ashr")
 ```
+
+#### Old vs AD
+
+We set the reference factor to old to get the differentially expressed genes between the old and the AD group this time.
+
+```{r}
+dds_star$group <- relevel(dds_star$group, ref = "Old")
+
+dds_star_oad <- DESeq(dds_star)
+res_star_oad <- results(dds_star_oad, alpha = 0.05)
+
+res_star_oad
+```
+
+```{r}
+summary(res_star_oad)
+```
+
+```{r}
+plotMA(res_star_oad, main="normal")
+
+resAsh <- lfcShrink(dds_star_oad, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### AD vs Young
+
+Lastly, we set the reference factor to old to get the differentially expressed genes between the AD and the young group.
+
+```{r}
+dds_star$group <- relevel(dds_star$group, ref = "AD")
+
+dds_star_ady <- DESeq(dds_star)
+res_star_ady <- results(dds_star_ady, alpha = 0.05)
+
+res_star_ady
+```
+
+```{r}
+summary(res_star_ady)
+```
+
+```{r}
+plotMA(res_star_ady, main="normal")
+
+resAsh <- lfcShrink(dds_star_ady, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### General
 
 ```{r}
 plotCount <- plotCounts(
@@ -1050,18 +1058,18 @@ plotCount <- plotCounts(
   returnData=TRUE
   )
 
-
 ggplot(plotCount, aes(x=group, y=count)) + 
   geom_point(position=position_jitter(w=0.1,h=0)) + 
   scale_y_log10(breaks=c(25,100,400))
 ```
+
+`vst()` was chosen over `rld()` because it is a much faster transformation.
 
 ```{r}
 msd <- meanSdPlot(assay(dds_star_yo), plot = FALSE)
 msd$gg + 
   ggtitle('Without Transformation') 
 
-# vst is a much faster transformation than rld
 vst <- vst(dds_star_yo, blind=FALSE)
 msd_vst <- meanSdPlot(assay(vst), plot = FALSE)
 msd_vst$gg + 
@@ -1100,53 +1108,28 @@ pheatmap(sampleDistMatrix,
 plotPCA(vst, intgroup='group')
 ```
 
-#### Old vs AD
-
-```{r}
-# set reference factor to old - Old vs AD
-dds_star$group <- relevel(dds_star$group, ref = "Old")
-
-dds_star_oad <- DESeq(dds_star)
-res_star_oad <- results(dds_star_oad, alpha = 0.05)
-
-res_star_oad
-```
-
-```{r}
-summary(res_star_oad)
-```
-
-```{r}
-plotMA(res_star_oad, main="normal")
-
-resAsh <- lfcShrink(dds_star_oad, coef=3, type="ashr")
-plotMA(resAsh, main="ashr")
-```
-
-#### AD vs Young
-
-```{r}
-# set reference factor to disease - AD vs Young
-dds_star$group <- relevel(dds_star$group, ref = "AD")
-
-dds_star_ady <- DESeq(dds_star)
-res_star_ady <- results(dds_star_ady, alpha = 0.05)
-
-res_star_ady
-```
-
-```{r}
-summary(res_star_ady)
-```
-
-```{r}
-plotMA(res_star_ady, main="normal")
-
-resAsh <- lfcShrink(dds_star_ady, coef=3, type="ashr")
-plotMA(resAsh, main="ashr")
-```
-
 ### kallisto
+
+In this section, we will do the same steps for the count matrix where we aligned the data with kallisto. Again, we load our matrix. After taking a look at the head of the loaded data, it is clear that there needs to be done some tidying.
+
+```{r}
+kallisto <- read.table(
+  'data/count.kallisto.txt', 
+  header = TRUE, 
+  sep = '\t',
+  row.names = 1
+  )
+
+head(kallisto)
+```
+
+In order to get a clean matrix, we first drop the columns Chr, Start, End, Strand and Length as they are not necessary.
+
+```{r}
+kallisto <- kallisto[, -(1:5)]
+```
+
+The remaining columns correspond to the samples. However, they are still named after the path and filenames featureCounts received. To shorten the names and make the data easierto read, we define a list with the sample ids and then change the colnames into them. We now see that our data is much cleaner.
 
 ```{r}
 colname <- list(
@@ -1157,17 +1140,6 @@ colname <- list(
   '4-13A-Young','5-18T-Young','6-14A-Young','7-19T-Young','8-15A-Young','9-16A-Young'
   )
 
-kallisto <- read.table(
-  'data/count.kallisto.txt', 
-  header = TRUE, 
-  sep = '\t',
-  row.names = 1
-  )
-
-# drop Chr, Start, End, Strand, Length
-kallisto <- kallisto[, -(1:5)]
-
-# change column names to sample ids
 i <- 1
 for (name in colnames(kallisto)){
   colnames(kallisto)[colnames(kallisto) == name] <- colname[i]
@@ -1176,6 +1148,8 @@ for (name in colnames(kallisto)){
 
 head(kallisto)
 ```
+
+Now, we load the metafile we wrote for the kallisto data.
 
 ```{r}
 coldata_kal <- read.csv(
@@ -1187,11 +1161,14 @@ coldata_kal <- read.csv(
 head(coldata_kal)
 ```
 
+Again, we check the form of our data to make sure it is adequately prepared for DESeq.
+
 ```{r}
-# check form of data
 all(rownames(coldata_kal) %in% colnames(kallisto))
 all(rownames(coldata_kal) == colnames(kallisto))
 ```
+
+Now, we factor the groups again and build a DESeqDataSet afterwards.
 
 ```{r}
 coldata_kal$group <- factor(coldata_kal$group)
@@ -1205,8 +1182,9 @@ dds_kallisto <- DESeqDataSetFromMatrix(
 dds_kallisto
 ```
 
+We pre-filter the DESeqDataSet. This time, about 36000 rows with low counts were removed. The kallisto DESeqDataSet had about 63000 counts in the beginning, while the STAR DESeqDataSet only had about 27000. It is assumed that Nativio et al. already did some pre-filtering on the STAR count matrix too.
+
 ```{r}
-# filter low counts
 keep <- rowSums(counts(dds_kallisto)) >= 10
 dds_kallisto <- dds_kallisto[keep,]
 
@@ -1215,8 +1193,9 @@ dds_kallisto
 
 #### Young vs Old
 
+We set the reference factor to young to get the differentially expressed genes between the young and the old group and perform everything accordingly to the STAR data.
+
 ```{r}
-# set reference factor to young - Young vs Old
 dds_kallisto$group <- relevel(dds_kallisto$group, ref = "Young")
 
 dds_kal_yo <- DESeq(dds_kallisto)
@@ -1235,6 +1214,56 @@ plotMA(res_kal_yo, main="normal")
 resAsh <- lfcShrink(dds_kal_yo, coef=3, type="ashr")
 plotMA(resAsh, main="ashr")
 ```
+
+#### Old vs AD
+
+The same was done for the old and the AD group.
+
+```{r}
+dds_kallisto$group <- relevel(dds_kallisto$group, ref = "Old")
+
+dds_kal_oad <- DESeq(dds_kallisto)
+res_kal_oad <- results(dds_kal_oad, alpha = 0.05)
+
+res_kal_oad
+```
+
+```{r}
+summary(res_kal_oad)
+```
+
+```{r}
+plotMA(res_kal_oad, main="normal")
+
+resAsh <- lfcShrink(dds_kal_oad, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### AD vs Young
+
+The same was done for the AD and the young group.
+
+```{r}
+dds_kallisto$group <- relevel(dds_kallisto$group, ref = "AD")
+
+dds_kal_ady <- DESeq(dds_kallisto)
+res_kal_ady <- results(dds_kal_ady, alpha = 0.05)
+
+res_kal_ady
+```
+
+```{r}
+summary(res_kal_ady)
+```
+
+```{r}
+plotMA(res_kal_ady, main="normal")
+
+resAsh <- lfcShrink(dds_kal_ady, coef=3, type="ashr")
+plotMA(resAsh, main="ashr")
+```
+
+#### General
 
 ```{r}
 plotCount <- plotCounts(
@@ -1302,54 +1331,6 @@ pheatmap(sampleDistMatrix,
 ```{r}
 plotPCA(vst, intgroup='group')
 ```
-
-#### Old vs AD
-
-```{r}
-# set reference factor to old - Old vs AD
-dds_kallisto$group <- relevel(dds_kallisto$group, ref = "Old")
-
-dds_kal_oad <- DESeq(dds_kallisto)
-res_kal_oad <- results(dds_kal_oad, alpha = 0.05)
-
-res_kal_oad
-```
-
-```{r}
-summary(res_kal_oad)
-```
-
-```{r}
-plotMA(res_kal_oad, main="normal")
-
-resAsh <- lfcShrink(dds_kal_oad, coef=3, type="ashr")
-plotMA(resAsh, main="ashr")
-```
-
-#### AD vs Young
-
-```{r}
-# set reference factor to disease - AD vs Young
-dds_kallisto$group <- relevel(dds_kallisto$group, ref = "AD")
-
-dds_kal_ady <- DESeq(dds_kallisto)
-res_kal_ady <- results(dds_kal_ady, alpha = 0.05)
-
-res_kal_ady
-```
-
-```{r}
-summary(res_kal_ady)
-```
-
-```{r}
-plotMA(res_kal_ady, main="normal")
-
-resAsh <- lfcShrink(dds_kal_ady, coef=3, type="ashr")
-plotMA(resAsh, main="ashr")
-```
-
-
 
 ## Machine Learning
 
