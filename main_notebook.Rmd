@@ -14,15 +14,17 @@ date: '2022-06-20'
 
 Alzheimer's disease is the most prevalent kind of dementia and a fatal brain ailment. More study into this illness might lead to a better understanding of the condition and more effective treatment options.
 
-In this project, ChIP-seq data for H3K27ac, H3K9ac, H3K122ac and H3K4me1 as well as RNA-seq data from the from the lateral temporal lobe of the human brain for young healthy patients, old heathy patients and patients with Alzheimers disease will be analyzed and the differences between normal aging and cognitive impairment will be explored. The epigenomic or transcriptomic profiles will be analyzed to find relevant epigenetic alterations associated with the disease and help to better understand the molecular pathophysiology underlying.
+In this project, ChIP-seq data for H3K27ac, H3K9ac, H3K122ac and H3K4me1 as well as RNA-seq data from the from the lateral temporal lobe of the human brain for young healthy patients, old heathy patients and patients with Alzheimer's disease will be analyzed and the differences between normal aging and cognitive impairment will be explored. The epigenomic or transcriptomic profiles will be analyzed to find relevant epigenetic alterations associated with the disease and help to better understand the molecular pathophysiology underlying.
 
-Afterwards, with Machine Learning models the presence and absence of Alzheimer's disease based on the data. The models will be built with Support Vector Machines and Random Forest.
+Afterwards, with Machine Learning models the presence and absence of Alzheimer's disease based on the data. The models will be built with Support Vector Machines and Random Forest. Additionally, clustering methods will be tested.
 
-Finally, the findings will be compared to them in related papers, we will look into relevant *in vivo* experiments with model organisms and use the Genome Browser to generate ChIP-seq tracks.
+Finally, we will look at the functional enrichment of the ChIP-seq data and will add a STRING analysis for the RNA-seq data.
 
 For our project we were inspirated by the paper: Nativio R, Lan Y, Donahue G et al. ["An integrated multi-omics approach identifies epigenetic alterations associated with Alzheimer's disease."](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8098004/)
 
 The data is derived from GEO, [Series GSE153875](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE153875), for the CHiP-seq data and the raw RNA-seq data [Series GSE159699](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=PRJNA670209&o=acc_s%3Aa).
+
+For more detailed information about the data, please refer to the README of the repository.
 
 ## Data Integration RNA-seq
 
@@ -43,6 +45,8 @@ This part can be found in the Python notebook [notebook.ipynb](https://github.co
 ## Data Analysis ChIP-seq
 
 The main part of the ChIP-seq analysis can be found in the following section. For the deeptools part, refer the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Data Analysis ChIP-seq***.
+
+For the example code for `computeMatrix` and `plotHeatmap` of deeptools with H3K27ac, take  a look at [commands.txt](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/commands.txt).
 
 ### H3K27ac ChIPpeakAnno
 
@@ -182,7 +186,7 @@ venn <- Venn(SetNames=c("H3K27ac_AD", "H3K27ac_Old"),
 plot(venn)
 ```
 
-#### H3K27ac Functional Enrichment
+#### H3K27ac ChIPpeakAnno Functional Enrichment
 
 ```{r}
 # load gene annotation from UCSC for human genome build hg18
@@ -707,7 +711,7 @@ plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
             resample = 500, facet = 'row')
 ```
 
-#### H3K27ac Functional Enrichment
+#### H3K27ac ChIPseeker Functional Enrichment
 
 ```{r}
 genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
