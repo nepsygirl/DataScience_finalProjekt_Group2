@@ -1,0 +1,54 @@
+
+The “reference-point” method is commonly used before plotting the signal around the transcription start site. A reference point ("reference-point") is used to compute the signal distribution
+--regionsFileName, -R
+--scoreFileName, -S
+
+#All the below commands were executed in Terminal
+Plotting the signal distribution over exons or other feature types. Scale-regions ("scale-regions") is used to compute the signal distribution across an area. 
+computeMatrix scale-regions \
+    -q --skipZeros \
+    -S *.bigWig \ #for all BigWig files
+    -R hg19.bed \ #gene hg19 was used
+    -out matrix_one_group.gz
+plotHeatmap -m matrix_one_group.gz \
+    -out HeatmapScaleRegions.png \
+    --perGroup \
+    --plotTitle "correlation denoting scale regions"
+
+
+For only Young,Old and AD sample from H3K27ac Modification
+computeMatrix scale-regions \
+    -q --skipZeros \
+    -S Young-17T-H3K27ac.bw Old-10A-H3K27ac.bw AD-2A-H3K27ac.bw \ #Scale regions for only 3 Sample from H3K27ac Modification
+    -R hg19.bed \ #gene hg19 was used
+    -out matrix_one_group.gz
+plotHeatmap -m matrix_one_group.gz \
+    -out HeatmapScaleRegions2.png \
+    --perGroup \
+    --plotTitle "correlation denoting scale regions"
+
+
+
+#PlotCorrelation using multiBamSummary,where it computes the read coverages for genomic regions for typically two or more BAM files.
+#--bamfiles, -b--> List of indexed bam files separated by spaces. First, all the bam files should be indexed using below command.
+
+     -parallel  samtools index ::: *.bam
+
+
+The standard output of multiBamSummary is a compressed numpy array (.npz). The analysis performed for the entire genome by running the program in ‘bins’ mode.
+
+     -multiBamSummary bins --bamfiles *.bam -o readcounts.npz
+
+
+#plotCorrelation computes the overall similarity between two or more files based on read coverage (or other scores) within genomic regions, 
+#which was calculated using multiBamSummarySpearman correlation coefficients of read counts. The dendrogram indicates which samples’ read counts are most similar to each other.
+
+
+plotCorrelation \
+    -in readCounts.npz \
+    --corMethod spearman --skipZeros \
+    --plotTitle "Spearman Correlation of Read Counts" \
+    --whatToPlot heatmap --colorMap RdYlBu --plotNumbers \
+    -o heatmap_SpearmanCorr_readCounts.png   \
+    --outFileCorMatrix SpearmanCorr_readCounts.pdf
+
