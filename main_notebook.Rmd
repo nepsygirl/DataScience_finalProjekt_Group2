@@ -52,10 +52,20 @@ install("ChIPQC")
 require(rtracklayer)
 ```
 
+
 ```{r}
-# install the package "ChIPpeakAnno" from Bioconductor:
-source("http://bioconductor.org/biocLite.R")
-biocLite("ChIPpeakAnno")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
+```
+
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ChIPpeakAnno")
+
 ```
 
 The function read.table reads an input file and transformed it into a data.frame, the basic data structure in R. Lines starting with \# are ignored by default and the option header=TRUE indicates that the first line contains the column names.
@@ -176,8 +186,8 @@ plot(venn)
 
 ```{r}
 # load gene annotation from UCSC for human genome build hg18
-require(TxDb.Hsapiens.UCSC.hg18.knownGene)
-txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene 
+require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene 
 ```
 
 ```{r}
@@ -189,7 +199,7 @@ H3K27ac_AD.features
 ```
 
 ```{r}
-# get all genes from the data base as GRanges object.Alzeihmer Samples peaks that overlap the promotor region. First calculating the promotors as GRanges object
+# get all genes from the data base as GRanges object.Alzeihmer Sample peaks that overlap the promotor region. First calculating the promotors as GRanges object
 genes <- genes(txdb)
 # take the the region arround the gene start as promoter
 prom <- promoters(genes, upstream=2000, downstream=200)
@@ -218,9 +228,6 @@ H3K27ac_ADprom = genes[subjectHits(H3K27ac_ADatProm.Hits)]
 # take only unique ids
 gene1.ids <- unique(names(H3K27ac_ADprom))
 
-# write names to an output file
-write.table(gene1.ids, file="H3K27ac_AD_regulated_genes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
-```
 
 ### H3K4me1 with ChIPseeker
 
