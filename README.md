@@ -40,16 +40,17 @@ If you want to work with the FASTQ files of the RNA-seq data, please download th
 
 In this repository, we provide a Jupyter notebook and a R markdown file with all the code needed to rerun our project.
 
-In the R notebook, you find the RNA Analysis, the ChIP-seq Analysis with ChIPseeker, the Funtional Enrichment 
+In the R notebook, you find the RNA Analysis, the ChIP-seq Analysis with ChIPpeakAnno and ChIPseeker, the Functional Enrichment 
 and the Machine Learning for hierachical Clustering with RNA.
 
-To run it, the packages ... are needed and the files ...
+To run it, RStudio with the packages ChIPpeakAnno, Vennerable, TxDb.Hsapiens.UCSC.hg19.knownGene, ChIPseeker, rafalib, ggplot2, clusterProfile, org.Hs.en.db, tidyverse, DESeq2, vsn, pheatmap, RColorBrewer, EnsDb.Hsapiens.v79 and genefilter.
 
 In the python notebook, you find the Data Integration, the RNA Preprocessing, the Quality Control and the needed conversion, 
-the ChIP-seq Analysis with deeptools and the code to generate the ChIP-seq count matrices.
+the ChIP-seq Analysis with deeptools (with part of the code in commands.txt) and the code to generate the ChIP-seq count matrices.
 All of these processes run through the Terminal and have been integrated with the package subprocess into Python.
 Additionally, it includes the Machine Learning for Random Forest and SVM with the package scikit-learn.
 
-To run it, an environment with ... is needed and the files ...
+To run it, an environment with the packages subprocess, os, pickle, multiqc, numpy, pandas, matplotlib, seaborn and scikit-learn is needed.
+Be aware that to run the subprocess code, you may need to install additional software like kallisto, deeptools, etc. 
 
-*Please keep in mind that you may need to change the paths.*
+***Please keep in mind that you may need to change the paths. Some processes have a long run time like for example kallisto or multiBigWigsummary (it is recommended to use the provided files).***
