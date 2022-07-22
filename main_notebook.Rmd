@@ -309,7 +309,7 @@ The next four chunks will generate coverage plots for the peak over the chromoso
 
 `p` will show an overlapping plot for all samples, while adding `facet_grid()` will generate a seperate plot for every sample.
 
-Note that the `weightCol` parameter is necessary to distinguish the coverage easier.
+Note that the `weightCol` parameter is necessary to distinguish the coverage easier. Plotting the coverage plot will take some time.
 
 ```{r}
 p <- covplot(ad, weightCol = 'V5')
@@ -370,6 +370,8 @@ plotDistToTSS(oldList)
 plotDistToTSS(youngList)
 ```
 
+In the following, we define the promoter and then generate the tagMatrix for every sample. Be aware that this step will take some time.
+
 ```{r}
 promoter <- getPromoters(TxDb=txdb, upstream=3000, downstream=3000)
 
@@ -378,9 +380,11 @@ oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
 youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
 ```
 
+With the tagMatrix, we can plot the average profile for every sample. Here, we generate a plot per group with a separate curve for every sample. 
 
+Adding `facet = 'row'` will show each curve in a separate plot. With small modifications we can plot a single sample (for example `adMatrix[1]`) or a comparison by adding one sample per group (for example `c(adMatrix[1], oldMatrix[1], youngMatrix[1])`).
 
-Adding `facet = 'row'` will show each curve in a separate plot.
+Be aware that plotting these will take some time.
 
 ```{r}
 plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95)
@@ -390,7 +394,9 @@ plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95)
 
 #### H3K4me1 Functional Enrichment
 
+To get an insight in the functional enrichment of the ChIP-seq data, we wanted to take a look at KEGG (Kyoto Encyclopedia of Genes and Genomes) which annotates to pathways.
 
+In this version of the code, it is done for only the `adList` samples. However, `oldList` and `youngList` concluded in similar results, therefore not much can be concluded for the functional enrichment.
 
 ```{r}
 library(clusterProfiler)
@@ -407,6 +413,10 @@ dotplot(compKEGG,
         showCategory = 10, 
         title = "KEGG Pathway Enrichment Analysis")
 ```
+
+Because there was not much information in the KEGG approach, we also took a look at the GO (Gene Ontology) enrichment which annotates biological processes and molecular functions.
+
+Again, there was not much information in the results.
 
 ```{r}
 library(org.Hs.eg.db)
@@ -426,7 +436,7 @@ dotplot(compGO,
 In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K9ac.
 
 ```{r}
-path <- "Sonstiges/data/H3K9ac/"
+path <- "data/H3K9ac_bed/"
 
 files <- list.files(path = path)
 
@@ -544,18 +554,15 @@ youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
 ```
 
 ```{r}
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95)
 ```
 
 #### H3K9ac Functional Enrichment
 
 ```{r}
-genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+genes = lapply(adList, function(i) as.data.frame(i)$geneId)
 names(genes) = sub("_", "\n", names(genes))
 
 compKEGG <- compareCluster(geneCluster   = genes,
@@ -585,24 +592,21 @@ dotplot(compGO,
 In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K27ac.
 
 ```{r}
-path <- "Sonstiges/data/H3K27ac/"
+path <- "data/H3K27ac_bed/"
 
 files <- list.files(path = path)
 
 adfile <- grep("AD", files, value = TRUE)
 adfile <- grep(".bed", adfile, value = TRUE)
 for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
-adfile
 
 oldfile <- grep("O", files, value = TRUE)
 oldfile <- grep(".bed", oldfile, value = TRUE)
 for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
-oldfile
 
 youngfile <- grep("Y", files, value = TRUE)
 youngfile <- grep(".bed", youngfile, value = TRUE)
 for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
-youngfile
 ```
 
 ```{r}
@@ -706,18 +710,15 @@ youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
 ```
 
 ```{r}
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95)
 ```
 
 #### H3K27ac ChIPseeker Functional Enrichment
 
 ```{r}
-genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+genes = lapply(adList, function(i) as.data.frame(i)$geneId)
 names(genes) = sub("_", "\n", names(genes))
 
 compKEGG <- compareCluster(geneCluster   = genes,
@@ -747,24 +748,21 @@ dotplot(compGO,
 In the following, all the steps described for H3K4me1 will be repeated accordingly for H3K122ac.
 
 ```{r}
-path <- "Sonstiges/data/H3K122ac/"
+path <- "data/H3K122ac_bed/"
 
 files <- list.files(path = path)
 
 adfile <- grep("AD", files, value = TRUE)
 adfile <- grep(".bed", adfile, value = TRUE)
 for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
-adfile
 
 oldfile <- grep("O", files, value = TRUE)
 oldfile <- grep(".bed", oldfile, value = TRUE)
 for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
-oldfile
 
 youngfile <- grep("Y", files, value = TRUE)
 youngfile <- grep(".bed", youngfile, value = TRUE)
 for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
-youngfile
 ```
 
 ```{r}
@@ -865,18 +863,15 @@ youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
 ```
 
 ```{r}
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95)
 ```
 
 #### H3K122ac Functional Enrichment
 
 ```{r}
-genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+genes = lapply(adList, function(i) as.data.frame(i)$geneId)
 names(genes) = sub("_", "\n", names(genes))
 
 compKEGG <- compareCluster(geneCluster   = genes,
@@ -1064,6 +1059,10 @@ plotMA(resAsh, main="ashr")
 
 #### General
 
+In the next section, we compare between all three groups, so we apply each function only once.
+
+In the first chunk, we take a look at the differences for the counts between the groups.
+
 ```{r}
 plotCount <- plotCounts(
   dds_star_yo, 
@@ -1077,7 +1076,7 @@ ggplot(plotCount, aes(x=group, y=count)) +
   scale_y_log10(breaks=c(25,100,400))
 ```
 
-`vst()` was chosen over `rld()` because it is a much faster transformation.
+In the next step, a Variance Stabilizing Transformation was applied. `vst()` was chosen over `rld()` because it is a much faster transformation.
 
 ```{r}
 msd <- meanSdPlot(assay(dds_star_yo), plot = FALSE)
@@ -1089,6 +1088,8 @@ msd_vst <- meanSdPlot(assay(vst), plot = FALSE)
 msd_vst$gg + 
   ggtitle('Variance Stabilizing Transformation')
 ```
+
+Now, we plot a heatmap for the Top 30 differentially expressed genes. Here we get an overview about the different expression levels between the groups.
 
 ```{r}
 select <- order(rowMeans(
@@ -1104,6 +1105,8 @@ pheatmap(
   )
 ```
 
+We build a sample distance matrix, to take a look at how the samples are clustered. This gives us an impression how similar the samples are within and in between the groups.
+
 ```{r}
 sampleDists <- dist(t(assay(vst)))
 sampleDistMatrix <- as.matrix(sampleDists)
@@ -1117,6 +1120,8 @@ pheatmap(sampleDistMatrix,
          clustering_distance_cols=sampleDists,
          col=colors)
 ```
+
+Lastly, we generate a PCA plot. This shows us again how reliable the samples are grouped or if there is a lot of intersection.
 
 ```{r}
 plotPCA(vst, intgroup='group')
@@ -1279,6 +1284,8 @@ plotMA(resAsh, main="ashr")
 
 #### General
 
+Again, the general part was done only once as a comparison over all three groups.
+
 ```{r}
 plotCount <- plotCounts(
   dds_kal_yo, 
@@ -1298,12 +1305,13 @@ msd <- meanSdPlot(assay(dds_kal_yo), plot = FALSE)
 msd$gg + 
   ggtitle('Without Transformation') 
 
-# vst is a much faster transformation than rld
 vst <- vst(dds_kal_yo, blind=FALSE)
 msd_vst <- meanSdPlot(assay(vst), plot = FALSE)
 msd_vst$gg + 
   ggtitle('Variance Stabilizing Transformation')
 ```
+
+For the heatmap, we needed to get the gene symbols from Ensembl, because we just had the gene ids in the kallisto count matrix.
 
 ```{r}
 select <- order(rowMeans(
@@ -1346,6 +1354,8 @@ pheatmap(sampleDistMatrix,
 plotPCA(vst, intgroup='group')
 ```
 
+
+
 ## Machine Learning
 
 The clustering part for the Machine Learning can be found in the following section. The generation of the ChIP-seq count matrices and the classification part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Machine Learning***.
@@ -1354,7 +1364,7 @@ The clustering part for the Machine Learning can be found in the following secti
 
 This was the first try to implement the SVM for the RNA-seq data. Unfortunately, this did not work and was abadoned. The SVM was implemented with scikit-learn in the Python Notebook.
 
-Because this did not work, the chunks in this section will be not evaluated.
+Because this did not work, the chunks in this section will not be evaluated.
 
 ```{r eval = FALSE}
 #read rna count_matrix
@@ -1446,7 +1456,6 @@ plot(svm)
 ### Hierachical Clustering
 
 ```{r}
-
 #read rna count_matrix
 rna <- read.table(
   '/home/melika/analysis/GSE159699_summary_count.star.txt', 
@@ -1540,3 +1549,8 @@ heatmap.2(data[idx,], labCol=metafile$group,
           ColSideColors=cols, 
           col=hmcol)
 ```
+
+
+## STRING Analysis
+
+The STRING Analysis for the Top 30 genes of both RNA-seq datasets were done directly in the browser on the [STRING website](https://string-db.org/).
