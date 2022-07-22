@@ -25,8 +25,8 @@ The RNA count matrices and the corresponding metafiles can be found in the folde
 [data](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/tree/main/data)
 as well as the gene_summary.txt that is needed for the Machine Learning with RNA using Random Forest and SVM.
 
-The count matrices for the ChIP-seq datasets, the npz files generated for the ChIP-seq datasets with multiBigWigSummary of deeptools and 
-the bed files of the ChIP-seq datasets can be found in the following [Google Drive](),
+The count matrices for the ChIP-seq datasets, the npz files generated for the ChIP-seq datasets with `multiBigWigSummary` of deeptools and 
+the bed files of the ChIP-seq datasets can be found in the following [Google Drive](https://drive.google.com/drive/folders/1xbMaWXJ4Y3V-Mbgpk7QPJ8Ei1wpMmPTs?usp=sharing),
 because they were to big to upload them into this repository.
 
 If you want to work with the BigWig files of the ChIP-seq data, please download them directly from 
