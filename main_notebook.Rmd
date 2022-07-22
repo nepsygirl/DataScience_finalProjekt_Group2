@@ -231,7 +231,7 @@ H3K27ac_ADprom = genes[subjectHits(H3K27ac_ADatProm.Hits)]
 
 # take only unique ids
 gene1.ids <- unique(names(H3K27ac_ADprom))
-
+```
 
 ### H3K4me1 with ChIPseeker
 
@@ -248,24 +248,21 @@ library(ggplot2)
 In the next step, we read the BED files for H3K4me1 and split them into AD, old and young.
 
 ```{r}
-path <- "Sonstiges/data/H3K4me1/"
+path <- "data/H3K4me1_bed/"
 
 files <- list.files(path = path)
 
 adfile <- grep("AD", files, value = TRUE)
 adfile <- grep(".bed", adfile, value = TRUE)
 for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
-adfile
 
 oldfile <- grep("O", files, value = TRUE)
 oldfile <- grep(".bed", oldfile, value = TRUE)
 for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
-oldfile
 
 youngfile <- grep("Y", files, value = TRUE)
 youngfile <- grep(".bed", youngfile, value = TRUE)
 for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
-youngfile
 ```
 
 In the following three chunks, we build GRangesLists for every group.
@@ -346,6 +343,8 @@ p +
   facet_grid(chr ~ .id)
 ```
 
+With the function `lapply` we apply `annotatePeak` to every item in ad, old and young. 
+
 ```{r}
 adList <- lapply(ad, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
@@ -355,11 +354,15 @@ youngList <- lapply(young, annotatePeak, TxDb = txdb,
                  tssRegion = c(-3000,3000), verbose=FALSE)
 ```
 
+With the function `plotAnnoBar` we can look at the feature distribution for any conspicous occurences. 
+
 ```{r}
 plotAnnoBar(adList)
 plotAnnoBar(oldList)
 plotAnnoBar(youngList)
 ```
+
+The same can be done for transcription factor binding loci with `plotDistToTSS`.
 
 ```{r}
 plotDistToTSS(adList)
@@ -375,21 +378,24 @@ oldMatrix <- lapply(old, getTagMatrix, windows=promoter)
 youngMatrix <- lapply(young, getTagMatrix, windows=promoter)
 ```
 
+
+
+Adding `facet = 'row'` will show each curve in a separate plot.
+
 ```{r}
-plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
-plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95,
-            resample = 500, facet = 'row')
+plotAvgProf(adMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(oldMatrix, xlim = c(-3000,3000), conf = 0.95)
+plotAvgProf(youngMatrix, xlim = c(-3000,3000), conf = 0.95)
 ```
 
 #### H3K4me1 Functional Enrichment
 
+
+
 ```{r}
 library(clusterProfiler)
 
-genes = lapply(c(adList, oldList, youngList), function(i) as.data.frame(i)$geneId)
+genes = lapply(adList, function(i) as.data.frame(i)$geneId)
 names(genes) = sub("_", "\n", names(genes))
 
 compKEGG <- compareCluster(geneCluster   = genes,
@@ -405,9 +411,9 @@ dotplot(compKEGG,
 ```{r}
 library(org.Hs.eg.db)
 compGO <- compareCluster(geneCluster   = genes,
-                           fun           = "enrichGO",
-                           pvalueCutoff  = 0.05,
-                           pAdjustMethod = "BH",
+                         fun           = "enrichGO",
+                         pvalueCutoff  = 0.05,
+                         pAdjustMethod = "BH",
                          OrgDb = "org.Hs.eg.db")
 
 dotplot(compGO, 
@@ -427,17 +433,14 @@ files <- list.files(path = path)
 adfile <- grep("AD", files, value = TRUE)
 adfile <- grep(".bed", adfile, value = TRUE)
 for (i in 1:length(adfile)) assign(adfile[i], readPeakFile(paste(path,adfile[i], sep="")))
-adfile
 
 oldfile <- grep("O", files, value = TRUE)
 oldfile <- grep(".bed", oldfile, value = TRUE)
 for (i in 1:length(oldfile)) assign(oldfile[i], readPeakFile(paste(path,oldfile[i], sep="")))
-oldfile
 
 youngfile <- grep("Y", files, value = TRUE)
 youngfile <- grep(".bed", youngfile, value = TRUE)
 for (i in 1:length(youngfile)) assign(youngfile[i], readPeakFile(paste(path,youngfile[i], sep="")))
-youngfile
 ```
 
 ```{r}
@@ -1346,6 +1349,99 @@ plotPCA(vst, intgroup='group')
 ## Machine Learning
 
 The clustering part for the Machine Learning can be found in the following section. The generation of the ChIP-seq count matrices and the classification part can be found in the Python notebook [notebook.ipynb](https://github.com/nepsygirl/DataScience_finalProjekt_Group2/blob/main/notebook.ipynb) in the repository, in the section ***Machine Learning***.
+
+## SVM method for RNA
+
+This was the first try to implement the SVM for the RNA-seq data. Unfortunately, this did not work and was abadoned. The SVM was implemented with scikit-learn in the Python Notebook.
+
+Because this did not work, the chunks in this section will be not evaluated.
+
+```{r eval = FALSE}
+#read rna count_matrix
+rna_seq <- read.table(
+  '/home/melika/analysis/GSE159699_summary_count.star.txt', 
+  header = TRUE, 
+  sep = '\t',
+  row.names = 'refGene'
+)
+#head(rna_seq)
+
+#read metafile
+metafile<- read.csv(
+  '/home/melika/analysis/star_col.csv',
+  row.names = 1,
+  sep = ';'
+)
+#head(metafile)
+```
+
+```{r eval = FALSE}
+library(DESeq2)
+library(RandPro)
+library(caret)
+library(rlang)
+set.seed(2128)
+
+i <- 1
+for (name in colnames(rna_seq)){
+  colnames(rna_seq)[colnames(rna_seq) == name] <- rownames(metafile)[i]
+  i = i + 1
+}
+
+# check form of data
+all(rownames(metafile) %in% colnames(rna_seq))
+all(rownames(metafile) == colnames(rna_seq))
+
+metafile$group <- factor(metafile$group)
+
+#create DESeq matrix
+de_matrix <- DESeqDataSetFromMatrix(
+  countData = rna_seq,
+  colData = metafile,
+  design = ~ group
+)
+
+#if count<10 left out that row
+keep <- rowSums(counts(de_matrix)) >= 10
+de_matrix <- de_matrix[keep,]
+
+#filtering genes based on Cook's distance when there are many degrees of freedom and create DESeq object 
+de_matrix <- DESeq(de_matrix)
+
+#sorts the values of matrix given by their index in increasing order
+select <- order(rowMeans(
+  counts(de_matrix, normalized=TRUE)),
+  decreasing=TRUE
+)[1:30]
+
+# normalization of deseq_matrix
+vst <- vst(de_matrix, blind=FALSE)
+#extract normalized counts in readable format from the DEseq object 
+data <- assay(vst)[select,]
+
+#splitting data
+nTest <- ceiling(ncol(data) * 0.7)
+ind <- sample(ncol(data), nTest, FALSE)
+```
+
+```{r eval = FALSE}
+#classification models.
+train <- data[ ,ind] + 1
+test <- data[ ,-ind] + 1
+```
+
+```{r eval = FALSE}
+##did not work!!!
+
+## Support vector machines with radial basis function kernel
+
+set.seed(2128)
+
+svm <- classify(train,test,method = "svmRadial",preProcessing = "deseq-vst")
+show(svm)
+trained(svm)
+plot(svm)
+```
 
 ### Hierachical Clustering
 
